@@ -24,17 +24,19 @@ fi
 usermod -u $DBOX_UID -g $DBOX_GID dropbox > /dev/null 2>&1
 
 # Change ownership to dropbox account on all working folders.
-chown -R $DBOX_UID:$DBOX_GID /opt/dropbox /dbox
+chown -R $DBOX_UID:$DBOX_GID /dbox
 
 # Replace hostname in /etc/hosts
 echo "$(grep -E '(localhost|::)' /etc/hosts)" > /etc/hosts
 echo 127.0.0.1 $(hostname) >> /etc/hosts
 
-# If updated dropboxd exists, run it, if not run default.
-if [ ! -f "/dbox/.dropbox-dist/dropboxd" ]; then
-	echo "dropboxd($(cat /opt/dropbox/VERSION)) started..."
-	sudo -u dropbox /opt/dropbox/dropboxd &
+# If dropbox is already extracted, run it. If not, extract then run.
+if [ -f "/dbox/.dropbox-dist/dropboxd" ]; then
+	echo "dropboxd($(cat /dbox/.dropbox-dist/VERSION)) started..."
+	exec sudo -u dropbox /dbox/.dropbox-dist/dropboxd &
 else
+	tar -xzf /dbox/base/dropbox.tar.gz -C /dbox/
+	chown -R $DBOX_UID:$DBOX_GID /dbox/.dropbox-dist
 	echo "dropboxd($(cat /dbox/.dropbox-dist/VERSION)) started..."
 	exec sudo -u dropbox /dbox/.dropbox-dist/dropboxd &
 fi

@@ -3,31 +3,29 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Download & install required applications: curl, sudo.
 RUN apt-get -qqy update
-RUN apt-get -qqy install curl sudo
-
-# Download & install current version of dropbox.
-RUN mkdir -p /opt/dropbox
-RUN curl --silent -L "https://www.dropbox.com/download?plat=lnx.x86_64" | tar -xzf - --strip-components=1 -C /opt/dropbox
-
-# Perform image clean up.
-RUN apt-get -qqy purge curl
-RUN apt-get -qqy autoremove
-RUN dpkg -l | grep ^rc | awk '{print $2}' | xargs dpkg -P
-RUN apt-get -qqy autoclean
+RUN apt-get -qqy install wget python sudo
 
 # Create service account and set permissions.
-RUN useradd -d /dbox -c "Dropbox Daemon Account" -s /usr/sbin/nologin dropbox
-RUN chown -R dropbox /opt/dropbox
-RUN mkdir -p /dbox/.dropbox /dbox/.dropbox-dist /dbox/Dropbox
+RUN useradd -d /dbox -c "Dropbox Daemon Account" -s /bin/bash dropbox
+RUN mkdir -p /dbox/.dropbox /dbox/.dropbox-dist /dbox/Dropbox /dbox/base
+
+# Download & install current version of dropbox.
+RUN wget -nv -O /dbox/base/dropbox.tar.gz "https://www.dropbox.com/download?plat=lnx.x86_64"
+RUN wget -nv -O /dbox/dropbox.py "https://www.dropbox.com/download?dl=packages/dropbox.py"
+
+# Perform image clean up.
+RUN apt-get -qqy autoclean
+
+# Set permissions
 RUN chown -R dropbox /dbox
 
 # Install script for managing dropbox init.
-COPY run_dropbox.sh /opt/dropbox/
-RUN chmod +x /opt/dropbox/run_dropbox.sh
+COPY run.sh /dbox/
+RUN chmod +x /dbox/run.sh /dbox/dropbox.py
 
 VOLUME ["/dbox/.dropbox", "/dbox/.dropbox-dist", "/dbox/Dropbox"]
 
 # Dropbox Lan-sync
 EXPOSE 17500
 
-CMD ["/opt/dropbox/run_dropbox.sh"]
+CMD ["/dbox/run.sh"]
