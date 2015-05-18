@@ -6,7 +6,7 @@ RUN apt-get -qqy update
 RUN apt-get -qqy install wget python sudo
 
 # Create service account and set permissions.
-RUN useradd -d /dbox -c "Dropbox Daemon Account" -s /bin/bash dropbox
+RUN useradd -d /dbox -c "Dropbox Daemon Account" -s /usr/sbin/nologin dropbox
 RUN mkdir -p /dbox/.dropbox /dbox/.dropbox-dist /dbox/Dropbox /dbox/base
 
 # Download & install current version of dropbox.
@@ -20,12 +20,13 @@ RUN apt-get -qqy autoclean
 RUN chown -R dropbox /dbox
 
 # Install script for managing dropbox init.
-COPY run.sh /dbox/
-RUN chmod +x /dbox/run.sh /dbox/dropbox.py
+COPY run /dbox/
+COPY dropbox /usr/local/bin/
+RUN chmod +x /dbox/run /usr/local/bin/dropbox /dbox/dropbox.py
 
 VOLUME ["/dbox/.dropbox", "/dbox/.dropbox-dist", "/dbox/Dropbox"]
 
 # Dropbox Lan-sync
 EXPOSE 17500
 
-CMD ["/dbox/run.sh"]
+CMD ["/dbox/run"]

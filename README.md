@@ -29,6 +29,6 @@ Bash script used to launch container, for first time setup check log after start
     -v /etc/localtime:/etc/localtime:ro \
     $IMAGE
 
-For Synology users, exclude @eadir after dropbox is running and linked:
-
-    docker exec -t Dropbox sudo -u dropbox /dbox/dropbox.py exclude add /dbox/Dropbox/\@eadir/
+To manage exclusions or check status using dropbox.py command via:
+    
+    docker exec -t -i Dropbox dropbox help
