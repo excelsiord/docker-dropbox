@@ -26,6 +26,9 @@ usermod -u $DBOX_UID -g $DBOX_GID dropbox > /dev/null 2>&1
 # Change ownership to dropbox account on all working folders.
 chown -R $DBOX_UID:$DBOX_GID /dbox
 
+# Change permissions on Dropbox folder
+chmod 755 /dbox/Dropbox
+
 # Replace hostname in /etc/hosts
 echo "$(grep -E '(localhost|::)' /etc/hosts)" > /etc/hosts
 echo 127.0.0.1 $(hostname) >> /etc/hosts
